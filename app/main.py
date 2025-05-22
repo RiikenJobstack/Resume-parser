@@ -149,7 +149,7 @@ async def upload_resume(
         # Create response
         return {
             "success": True,
-            "parsed": parsed_data,
+            "data": parsed_data,
             "extractionMetadata": create_extraction_metadata(
                 file_extension[1:],  # Remove the dot
                 len(processed_text),
@@ -260,7 +260,7 @@ async def parse_resume(request: Request, file_data: FileUploadRequest):
         # Create response
         return {
             "success": True,
-            "parsed": parsed_data,
+            "data": parsed_data,
             "extractionMetadata": create_extraction_metadata(
                 file_extension[1:],  # Remove the dot
                 len(processed_text),

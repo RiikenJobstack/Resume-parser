@@ -1,55 +1,97 @@
 from typing import Dict, List, Optional, Any, Union
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 class FileUploadRequest(BaseModel):
     """Request model for file upload"""
     fileName: str
     fileData: str  # Base64 encoded file data
 
-class WorkExperience(BaseModel):
-    """Work experience model"""
-    role: str = "Not provided"
-    company: str = "Not provided"
+class PersonalInfo(BaseModel):
+    """Personal information model"""
+    fullName: str = "Not provided"
+    jobTitle: str = "Not provided"
+    email: str = "Not provided"
+    phone: str = "Not provided"
     location: str = "Not provided"
-    duration: str = "Not provided"
+    summary: str = "Not provided"
+    profilePicture: Optional[str] = None
+
+class ExperienceItem(BaseModel):
+    """Experience item model"""
+    jobTitle: str = ""
+    company: str = ""
+    location: str = ""
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    currentPosition: bool = False
     description: List[str] = Field(default_factory=list)
 
-class Education(BaseModel):
-    """Education model"""
-    institution: str = "Not provided"
-    degree: str = "Not provided"
-    major: str = "Not provided"
-    score: str = "Not provided"
-    years: str = "Not provided"
-
-class Skills(BaseModel):
-    """Skills model"""
-    languages: List[str] = Field(default_factory=list)
-    frameworks_libraries: List[str] = Field(default_factory=list)
-    cloud_databases_tech_stack: List[str] = Field(default_factory=list)
-    tools: List[str] = Field(default_factory=list)
-
-class Project(BaseModel):
-    """Project model"""
-    name: str = "Not provided"
-    description: str = "Not provided"
+class ProjectItem(BaseModel):
+    """Project item model"""
+    projectName: str = ""
+    projectUrl: str = ""
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    ongoingProject: bool = False
+    description: List[str] = Field(default_factory=list)
     technologies: List[str] = Field(default_factory=list)
-    url: str = "Not provided"
+
+class EducationItem(BaseModel):
+    """Education item model"""
+    degree: str = ""
+    institution: str = ""
+    location: str = ""
+    startDate: Optional[str] = None
+    endDate: Optional[str] = None
+    current: bool = False
+    gpa: str = ""
+    description: List[str] = Field(default_factory=list)
+
+class SkillsState(BaseModel):
+    """Skills section state"""
+    categoryOrder: List[str] = Field(default_factory=list)
+    viewMode: str = "categorized"
+
+class Section(BaseModel):
+    """Generic section model"""
+    id: str
+    type: str
+    title: str
+    order: int
+    hidden: bool = False
+    format: Optional[str] = None
+    items: List[Union[ExperienceItem, ProjectItem, EducationItem, Dict[str, Any]]] = Field(default_factory=list)
+    groups: List[Dict[str, Any]] = Field(default_factory=list)
+    state: Dict[str, Any] = Field(default_factory=dict)
 
 class ResumeData(BaseModel):
     """Resume data model"""
-    name: str = "Not provided"
-    email: str = "Not provided"
-    phone: str = "Not provided"
-    linkedin: str = "Not provided"
-    github: str = "Not provided"
-    portfolio: str = "Not provided"
-    skills: Skills = Field(default_factory=Skills)
-    education: List[Education] = Field(default_factory=list)
-    work_experience: List[WorkExperience] = Field(default_factory=list)
-    projects: List[Project] = Field(default_factory=list)
-    certifications: List[str] = Field(default_factory=list)
-    languages: List[str] = Field(default_factory=list)
+    id: Optional[str] = None
+    targetJobTitle: str = "Not provided"
+    targetJobDescription: str = "Not provided"
+    personalInfo: PersonalInfo = Field(default_factory=PersonalInfo)
+    sections: List[Section] = Field(default_factory=list)
+
+class StyleSettings(BaseModel):
+    """Template style settings"""
+    fontFamily: str = "'IBM Plex Serif', serif"
+    fontSize: str = "12pt"
+    lineHeight: str = "1.5"
+    headingColor: str = "#333"
+    textColor: str = "#333"
+    accentColor: str = "#444"
+    linkColor: str = "#007bff"
+
+class Template(BaseModel):
+    """Template model"""
+    id: str = "ibm-plex"
+    styleSettings: StyleSettings = Field(default_factory=StyleSettings)
+
+class CompleteResumeResponse(BaseModel):
+    """Complete resume response model"""
+    resumeData: ResumeData
+    lastEdited: str = Field(default_factory=lambda: datetime.utcnow().isoformat() + "Z")
 
 class ExtractionMetadata(BaseModel):
     """Metadata about the extraction process"""
@@ -63,7 +105,7 @@ class ExtractionMetadata(BaseModel):
 class ParseResponse(BaseModel):
     """Response model for resume parsing"""
     success: bool
-    parsed: ResumeData
+    data: CompleteResumeResponse
     extractionMetadata: ExtractionMetadata
 
 class ErrorResponse(BaseModel):
