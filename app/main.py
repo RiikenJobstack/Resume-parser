@@ -6,6 +6,7 @@ import os
 import base64
 import time
 import logging
+from datetime import datetime
 import re
 from typing import Dict, Any, Optional
 import io
@@ -57,6 +58,15 @@ if settings.REDIS_ENABLED:
 
 # Initialize services
 parser_service = ParserService(redis_client)
+
+@app.get("/health", response_model=HealthResponse)
+async def health_check():
+    """Basic health check endpoint"""
+    return {
+        "status": "ok",
+        "version": get_app_version(),
+        "timestamp": datetime.utcnow().isoformat() + "Z"
+    }
 
 @app.post("/extract-text")
 async def extract_text(file: UploadFile = File(...)):
