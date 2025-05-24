@@ -1,3 +1,4 @@
+# Core FastAPI dependencies
 fastapi==0.104.1
 uvicorn==0.23.2
 python-multipart==0.0.6
@@ -16,4 +17,12 @@ httpx==0.25.1
 pytest==7.4.3
 pytest-asyncio==0.21.1
 spacy==3.7.4
-textract==1.6.5
+
+# World-class PDF parser dependencies (NEW)
+PyMuPDF==1.23.14
+pytesseract==0.3.10
+pdf2image==1.17.0
+Pillow==10.1.0
+
+# NOTE: textract==1.6.5 REMOVED due to pdfminer.six version conflict
+# Our WorldClassPDFParser replaces textract with superior functionality
