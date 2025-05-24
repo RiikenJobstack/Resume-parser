@@ -2,9 +2,6 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from io import BytesIO
-import os
-import base64
-import time
 import logging
 from datetime import datetime
 import re
@@ -26,6 +23,8 @@ from app.services.utils import validate_base64, get_app_version, create_extracti
 from app.config import settings
 
 from app.services.parser_service import ParserService
+from app.resumeParser import ResumeParser
+from app.parserService import EnhancedDocumentService
 from .document_service import DocumentService  # Assuming your service is in document_service.py
 
 # Configure logging
@@ -85,14 +84,13 @@ async def extract_text(file: UploadFile = File(...)):
         raw_text = DocumentService.extract_text_from_file(file_buffer, ext)
         preprocessed_text = DocumentService.preprocess_text(raw_text)
         complexity = DocumentService.classify_resume_complexity(preprocessed_text)
-        try:
-            parsed_data = await parser_service.parse_resume_with_ai(preprocessed_text, complexity)
-        except ValueError as e:
-            raise HTTPException(status_code=500, detail=f"Failed to parse resume: {str(e)}")
+        ai_service = EnhancedDocumentService(openai_api_key=settings.OPENAI_API_KEY)
+        parsed_data = await ai_service.parse_resume_with_ai(preprocessed_text, complexity)
         
         return JSONResponse({
-            "extracted_text": parsed_data.dict(),  # Convert to dict
-            "complexity": complexity
+            "extracted_text": preprocessed_text,
+            "complexity": complexity,
+            "resumeData": parsed_data  # Now perfectly structured!
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Extraction error: {str(e)}")
